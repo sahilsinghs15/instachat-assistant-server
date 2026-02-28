@@ -43,6 +43,10 @@ export const handleMessage = async (req: Request, res: Response) => {
     if (body.object === "instagram") {
         try {
             for (const entry of body.entry) {
+                if (!entry.messaging || !entry.messaging[0]) {
+                    console.log("⚠️ Received entry with no messaging data (test event or non-message). Skipping.");
+                    continue;
+                }
                 const event = entry.messaging[0];
 
                 if (event.message && !event.message.is_echo) {
