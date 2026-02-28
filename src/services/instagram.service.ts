@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const INSTAGRAM_API_URL = "https://graph.facebook.com/v25.0/me/messages";
+const INSTAGRAM_API_URL = "https://graph.instagram.com/v25.0/me/messages";
 
 const PAGE_ACCESS_TOKEN = process.env.INSTAGRAM_PAGE_ACCESS_TOKEN || "";
 
@@ -18,7 +18,7 @@ export const getInstagramUsername = async (senderId: string): Promise<string | n
     }
 
     try {
-        const response = await axios.get(`https://graph.facebook.com/v25.0/${senderId}`, {
+        const response = await axios.get(`https://graph.instagram.com/v25.0/${senderId}`, {
             params: {
                 fields: "name,username",
                 access_token: PAGE_ACCESS_TOKEN,
