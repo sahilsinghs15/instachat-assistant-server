@@ -1,0 +1,47 @@
+# Dependency directories
+node_modules/
+jspm_packages/
+package-lock.json
+
+# Build output
+dist/
+build/
+out/
+
+# Environment variables (CRITICAL: Do not remove this)
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# TypeScript
+*.tsbuildinfo
+
+# OS Metadata
+.DS_Store
+Thumbs.db
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Diagnostic reports (Node.js)
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Neon / Database specific
+/database/*
+!database/.gitkeep

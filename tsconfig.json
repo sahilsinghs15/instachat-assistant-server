@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    /* Basic Options */
+    "target": "ESNext",                                /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
+    "module": "CommonJS",                              /* Specify what module code is generated. */
+    "lib": ["ESNext"],                                 /* Specify library files to be included in the compilation. */
+    "allowJs": true,                                   /* Allow JavaScript files to be a part of your program. */
+    "outDir": "./dist",                                /* Specify an output folder for all emitted files. */
+    "rootDir": "./src",                                /* Specify the root folder within your source files. */
+    "removeComments": true,                            /* Disable emitting comments. */
+    "noEmit": false,                                   /* Do not emit outputs. */
+    
+    /* Type Checking */
+    "strict": true,                                    /* Enable all strict type-checking options. */
+    "noImplicitAny": true,                             /* Enable error reporting for expressions and declarations with an implied 'any' type. */
+    "strictPropertyInitialization": false,             /* Allowed for TypeORM entities where values are set by the DB. */
+    "skipLibCheck": true,                              /* Skip type checking all .d.ts files. */
+    
+    /* Module Resolution */
+    "moduleResolution": "node",                        /* Specify how TypeScript looks up a file from a given module specifier. */
+    "baseUrl": "./",                                   /* Base directory to resolve non-relative module names. */
+    "paths": {
+      "@/*": ["src/*"]                                 /* Allows cleaner imports: import { User } from '@/entities/User' */
+    },
+    "esModuleInterop": true,                           /* Emit additional JavaScript to ease support for importing CommonJS modules. */
+    "forceConsistentCasingInFileNames": true,          /* Ensure that casing is correct in imports. */
+
+    /* Experimental Options (Required for TypeORM) */
+    "experimentalDecorators": true,                    /* Enables experimental support for ES7 decorators. */
+    "emitDecoratorMetadata": true,                     /* Enables experimental support for emitting design-type metadata for decorators. */
+
+    /* Advanced Options */
+    "resolveJsonModule": true                          /* Enable importing .json files. */
+  },
+  "include": ["src/**/*"],                             /* Include all files in the src directory. */
+  "exclude": ["node_modules", "**/*.spec.ts", "dist"]  /* Exclude dependency and build folders. */
+}
