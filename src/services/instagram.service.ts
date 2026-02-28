@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const PAGE_ACCESS_TOKEN = process.env.INSTAGRAM_PAGE_ACCESS_TOKEN;
-const INSTAGRAM_API_URL = "https://graph.facebook.com/v21.0/me/messages";
+const INSTAGRAM_API_URL = "https://graph.facebook.com/v25.0/me/messages";
 
 // Cache: IGSID → username (avoids calling the API on every message)
 const usernameCache: Map<string, string> = new Map();
@@ -17,7 +17,7 @@ export const getInstagramUsername = async (senderId: string): Promise<string | n
     }
 
     try {
-        const response = await axios.get(`https://graph.facebook.com/v21.0/${senderId}`, {
+        const response = await axios.get(`https://graph.facebook.com/v25.0/${senderId}`, {
             params: {
                 fields: "name,username",
                 access_token: PAGE_ACCESS_TOKEN,
