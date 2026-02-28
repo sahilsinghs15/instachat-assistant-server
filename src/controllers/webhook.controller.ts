@@ -41,10 +41,13 @@ export const handleMessage = async (req: Request, res: Response) => {
     const body = req.body;
 
     if (body.object === "instagram") {
+        // DEBUG: Log the full webhook payload to understand the structure
+        console.log("📦 Full webhook body:", JSON.stringify(body, null, 2));
+
         try {
             for (const entry of body.entry) {
                 if (!entry.messaging || !entry.messaging[0]) {
-                    console.log("⚠️ Received entry with no messaging data (test event or non-message). Skipping.");
+                    console.log("⚠️ Entry has no messaging array. Entry keys:", Object.keys(entry));
                     continue;
                 }
                 const event = entry.messaging[0];
