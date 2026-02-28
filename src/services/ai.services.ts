@@ -2,7 +2,7 @@ import OpenAI from "openai";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import axios from "axios";
 import { ChatHistory } from "../entities/ChatHistory";
-import AppDataSource from "@/data-source";
+import AppDataSource from "../data-source";
 
 // 1. Initialize Clients
 const grok = new OpenAI({ apiKey: process.env.XAI_API_KEY, baseURL: "https://api.x.ai/v1" });
@@ -45,16 +45,16 @@ export const getAIResponse = async (senderId: string, userPrompt: string): Promi
                     model: "llama-3.3-70b-versatile",
                 });
                 aiReply = completion.choices[0].message.content || "";
-            } 
-            
+            }
+
             else if (provider === "grok") {
                 const completion = await grok.chat.completions.create({
                     messages: messagesContext as any,
                     model: "grok-2-latest",
                 });
                 aiReply = completion.choices[0].message.content || "";
-            } 
-            
+            }
+
             else if (provider === "gemini") {
                 // Gemini uses a slightly different format for history
                 const chat = geminiModel.startChat({
@@ -65,16 +65,16 @@ export const getAIResponse = async (senderId: string, userPrompt: string): Promi
                 });
                 const result = await chat.sendMessage(userPrompt);
                 aiReply = result.response.text();
-            } 
-            
+            }
+
             else if (provider === "deepseek") {
                 const completion = await deepseek.chat.completions.create({
                     messages: messagesContext as any,
                     model: "deepseek-chat",
                 });
                 aiReply = completion.choices[0].message.content || "";
-            } 
-            
+            }
+
             else if (provider === "openrouter") {
                 const response = await axios.post("https://openrouter.ai/api/v1/chat/completions", {
                     model: "google/gemma-3-27b-it:free",

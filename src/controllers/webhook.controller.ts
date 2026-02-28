@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { Settings } from "../entities/Settings";
 import AppDataSource from "../data-source";
 import { sendInstagramMessage, sendSenderAction } from "../services/instagram.service";
-import { getAIResponse } from "@/services/ai.services";
+import { getAIResponse } from "../services/ai.services";
 
 /**
  * GET Webhook: Handshake verification with Meta
