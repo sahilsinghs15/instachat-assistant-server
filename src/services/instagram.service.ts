@@ -3,6 +3,38 @@ import axios from "axios";
 const PAGE_ACCESS_TOKEN = process.env.INSTAGRAM_PAGE_ACCESS_TOKEN;
 const INSTAGRAM_API_URL = "https://graph.facebook.com/v21.0/me/messages";
 
+// Cache: IGSID → username (avoids calling the API on every message)
+const usernameCache: Map<string, string> = new Map();
+
+/**
+ * Looks up the Instagram username from a sender's IGSID.
+ * Results are cached in memory so the API is only called once per user.
+ */
+export const getInstagramUsername = async (senderId: string): Promise<string | null> => {
+    // Check cache first
+    if (usernameCache.has(senderId)) {
+        return usernameCache.get(senderId)!;
+    }
+
+    try {
+        const response = await axios.get(`https://graph.facebook.com/v21.0/${senderId}`, {
+            params: {
+                fields: "name,username",
+                access_token: PAGE_ACCESS_TOKEN,
+            },
+        });
+        const username = response.data.username || null;
+        if (username) {
+            usernameCache.set(senderId, username);
+        }
+        console.log(`👤 Resolved sender ${senderId} → @${username}`);
+        return username;
+    } catch (error: any) {
+        console.error(`❌ Failed to lookup username for ${senderId}:`, error.response?.data || error.message);
+        return null;
+    }
+};
+
 /**
  * Sends a sender action (typing_on, typing_off, or mark_seen)
  */

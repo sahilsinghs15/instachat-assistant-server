@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Settings } from "../entities/Settings";
 import AppDataSource from "../data-source";
-import { sendInstagramMessage, sendSenderAction } from "../services/instagram.service";
+import { sendInstagramMessage, sendSenderAction, getInstagramUsername } from "../services/instagram.service";
 import { getAIResponse } from "../services/ai.services";
 
 /**
@@ -43,16 +43,26 @@ export const handleMessage = async (req: Request, res: Response) => {
                     const senderId = event.sender.id;
                     const userText = event.message.text;
 
-                    // 1. Mark the message as "Seen"
+                    // 2. Check if AI should only respond to a specific user
+                    const allowedUsername = process.env.ALLOWED_INSTAGRAM_USERNAME;
+                    if (allowedUsername) {
+                        const senderUsername = await getInstagramUsername(senderId);
+                        if (senderUsername !== allowedUsername) {
+                            console.log(`🚫 Ignoring message from @${senderUsername} (only responding to @${allowedUsername})`);
+                            continue; // Skip this message, process next
+                        }
+                    }
+
+                    // 3. Mark the message as "Seen"
                     await sendSenderAction(senderId, "mark_seen");
 
-                    // 2. Start the "Typing..." bubble
+                    // 4. Start the "Typing..." bubble
                     await sendSenderAction(senderId, "typing_on");
 
-                    // 3. Get AI Response (This takes 1-3 seconds)
+                    // 5. Get AI Response (This takes 1-3 seconds)
                     const aiReply = await getAIResponse(senderId, userText);
 
-                    // 4. Send the final message this will turn typing off
+                    // 6. Send the final message — this will turn typing off
                     await sendInstagramMessage(senderId, aiReply);
                 }
             }
