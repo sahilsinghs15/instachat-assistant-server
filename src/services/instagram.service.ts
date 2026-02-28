@@ -1,7 +1,8 @@
 import axios from "axios";
 
-const PAGE_ACCESS_TOKEN = process.env.INSTAGRAM_PAGE_ACCESS_TOKEN;
 const INSTAGRAM_API_URL = "https://graph.facebook.com/v25.0/me/messages";
+
+const PAGE_ACCESS_TOKEN = process.env.INSTAGRAM_PAGE_ACCESS_TOKEN || "";
 
 // Cache: IGSID → username (avoids calling the API on every message)
 const usernameCache: Map<string, string> = new Map();
