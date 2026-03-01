@@ -4,25 +4,11 @@ import axios from "axios";
 import { ChatHistory } from "../entities/ChatHistory";
 import AppDataSource from "../data-source";
 
-/**
- * System prompt that defines the AI's personality and behavioral rules.
- * The AI acts as Sahil Sir's assistant chatting with Sir ki wife.
- */
-const SYSTEM_PROMPT = `Tu Sahil Sir ka assistant hai, Sir ki taraf se unki wife se Instagram pe baat kar raha hai. Unhe "Sir Ki Miss" bol.
-
-KAAM: Jokes, shayari, funny baatein se mood theek kar. Hamesha respectful, warm aur caring rah.
-LANGUAGE: Hindi mein reply kar. Agar wo Marathi bole toh Marathi mein. English tab hi jab wo English bole.
-STYLE: "Sir Ki Miss, rukiye Sir aa rahe honge 😄" / "rukiye Sir so rahe honge 😴" jaisa bol.
-LIMIT: Khud ko AI/bot mat bol — tu Sir ka assistant hai. Adult/offensive/political content mat bol. Scope se bahar ho toh bol "Sir Ki Miss, ye toh Sir se poochna padega, hum toh bas aapka mood theek karne aaye hain! 😊"
-JOKES: Clean, family-friendly Hindi/Urdu shayari aur jokes. Marathi vinod bhi allowed.`;
+import { Settings } from "../entities/Settings";
 
 // 1. Initialize Clients
 const groq = new OpenAI({ apiKey: process.env.GROQ_API_KEY, baseURL: "https://api.groq.com/openai/v1" });
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-const geminiModel = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
-    systemInstruction: SYSTEM_PROMPT,
-});
 const deepseek = new OpenAI({ apiKey: process.env.DEEPSEEK_API_KEY, baseURL: "https://api.deepseek.com" });
 const grok = new OpenAI({ apiKey: process.env.XAI_API_KEY, baseURL: "https://api.x.ai/v1" });
 
@@ -45,6 +31,21 @@ console.log(`🤖 Active AI providers: [${PROVIDER_PRIORITY.join(", ")}]`);
 export const getAIResponse = async (senderId: string, userPrompt: string): Promise<string> => {
     const historyRepo = AppDataSource.getRepository(ChatHistory);
 
+    const settingsRepo = AppDataSource.getRepository(Settings);
+    const statusSetting = await settingsRepo.findOneBy({ key: "current_status" });
+    const currentStatus = statusSetting?.value || "Sir abhi kuch kaam kar rahe hain";
+
+    const DYNAMIC_SYSTEM_PROMPT = `Tu Sahil Sir ka sabse vafadaar chat assistant hai. Tu Sir ki taraf se unki wife (jinhe tu "Sir Ki Miss" bolta hai) se Instagram pe baat kar raha hai.
+
+STATUS: Sir ka current status hai: "${currentStatus}".
+
+Tera Kaam:
+1. Sabse pehle unko Sir ka status bata (jaise: "Sir Ki Miss, ${currentStatus}, wo aate hi honge...").
+2. Phir unka mood theek karne ke liye bol: "Tab tak kya main aapko ek chutkula sunaun ya shayari?"
+3. Pura response SIRF EK CHOTA PARAGRAPH (max 2 se 3 sentences) ka hona chahiye. Bahut lambi kahaniyan nahi likhni.
+4. Khud ko AI/bot nahi, assistant bol.
+5. Language: Jyadatar Hindi/Hinglish. Agar wo Marathi bole toh Marathi mein reply kar.`;
+
     // 1. Fetch last 10 messages for context (keeping it lean for free tiers)
     const previousMessages = await historyRepo.find({
         where: { sender_id: senderId },
@@ -52,9 +53,9 @@ export const getAIResponse = async (senderId: string, userPrompt: string): Promi
         take: 10,
     });
 
-    // 2. Format history for OpenAI-compatible providers (with system prompt at the start)
+    // 2. Format history for OpenAI-compatible providers (with dynamic system prompt at the start)
     const messagesContext: Array<{ role: string; content: string }> = [
-        { role: "system", content: SYSTEM_PROMPT },
+        { role: "system", content: DYNAMIC_SYSTEM_PROMPT },
         ...previousMessages.map(msg => ({
             role: msg.role,
             content: msg.message
@@ -86,7 +87,12 @@ export const getAIResponse = async (senderId: string, userPrompt: string): Promi
             }
 
             else if (provider === "gemini") {
-                // Gemini uses systemInstruction set at model level, so we only pass history + user message
+                // Initialize model here to inject dynamic system prompt
+                const geminiModel = genAI.getGenerativeModel({
+                    model: "gemini-2.0-flash",
+                    systemInstruction: DYNAMIC_SYSTEM_PROMPT,
+                });
+
                 const chat = geminiModel.startChat({
                     history: previousMessages.map(msg => ({
                         role: msg.role === "user" ? "user" : "model",

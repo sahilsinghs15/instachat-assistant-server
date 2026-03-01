@@ -35,4 +35,33 @@ app.get("/debug", (req, res) => {
     });
 });
 
+import { Settings } from "./entities/Settings";
+import AppDataSource from "./data-source";
+
+// API Endpoint for the upcoming Flutter Mobile App to change the AI's current status
+app.post("/api/status", async (req, res) => {
+    try {
+        const { status } = req.body;
+        if (!status) {
+            return res.status(400).json({ error: "Please provide a 'status' in the JSON body" });
+        }
+
+        const settingsRepo = AppDataSource.getRepository(Settings);
+        let statusSetting = await settingsRepo.findOneBy({ key: "current_status" });
+
+        if (statusSetting) {
+            statusSetting.value = status;
+            await settingsRepo.save(statusSetting);
+        } else {
+            await settingsRepo.save({ key: "current_status", value: status });
+        }
+
+        console.log(`📱 Mobile App updated status to: "${status}"`);
+        res.json({ success: true, message: "Status updated successfully", currentStatus: status });
+    } catch (error) {
+        console.error("Failed to update status:", error);
+        res.status(500).json({ error: "Failed to update status in Database" });
+    }
+});
+
 export default app;
